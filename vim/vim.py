@@ -61,13 +61,14 @@ class Vim(object):
                           'https://github.com/Lokaltog/vim-powerline.git',
                           'https://github.com/jistr/vim-nerdtree-tabs.git']
 
-        self.apt_packages = 'vim git-core'
+        self.apt_packages = 'vim git curl wget'
 
     @staticmethod
     def run_command(command, useShell=False, cwd_directory=None):
         commandList = command.split()
         try:
-            p = subprocess.Popen(commandList, shell=useShell, cwd=cwd_directory)
+            p = subprocess.Popen(
+                commandList, shell=useShell, cwd=cwd_directory)
             p.communicate()
             if p.returncode == 0:
                 logging.info("Command ran successfully: " + command)
@@ -80,26 +81,23 @@ class Vim(object):
             print("Command failed: " + command)
             sys.exit(-1)
 
-    def check_root(self):
-        """
-        Figures out if the user is root or not while running these scripts
-        """
+    # def check_root(self):
+    #     """
+    #     Figures out if the user is root or not while running these scripts
+    #     """
 
-        userId = os.getuid()
-        if userId is not 0:
-            self.run_command("clear")
-            print ("Sorry you should be running this script as root...")
-            logging.error("You are not root exiting script...")
-            sys.exit(1)
+    #     userId = os.getuid()
+    #     if userId is not 0:
+    #         self.run_command("clear")
+    #         print ("Sorry you should be running this script as root...")
+    #         logging.error("You are not root exiting script...")
+    #         sys.exit(1)
 
     def packages(self):
-        print ("Running updates and installing base packages...")
-        if os.path.isfile('/root/localMirror.txt'):
-            self.run_command("cp /root/localMirror.txt /etc/apt/sources.list")
+        print("Running updates and installing base packages...")
 
-        self.run_command("apt-get update")
-        self.run_command("apt-get upgrade -y")
-        self.run_command("apt-get install -y  " + self.apt_packages)
+        self.run_command("sudo pacman -Syyu")
+        self.run_command("sudo pacman -S --noconfirm  " + self.apt_packages)
 
     def pick_user(self, username):
         self.username = username
@@ -111,7 +109,8 @@ class Vim(object):
 
             # make sure the home directory exists
             if not os.path.isdir("/home/" + self.username + "/"):
-                logging.error("the home directory for this user doesn't exist.")
+                logging.error(
+                    "the home directory for this user doesn't exist.")
                 sys.exit(1)
 
     def directories(self):
@@ -129,9 +128,9 @@ class Vim(object):
         for each in self.git_repos:
             self.run_command('git clone ' + each, cwd_directory=self.dir_user +
                              '.vim/bundle/')
-        #update the modules for python-mode (see read me at the python-mode github)
+        # update the modules for python-mode (see read me at the python-mode github)
         self.run_command('git submodule update --init --recursive', cwd_directory=self.dir_user +
-                             '.vim/bundle/python-mode/')
+                         '.vim/bundle/python-mode/')
 
         # vim auto autoload file
         urllib.request.urlretrieve('https://tpo.pe/pathogen.vim',
@@ -157,13 +156,14 @@ class Vim(object):
                                    self.dir_user +
                                    '.vim/ftplugin/python_editing.vim')
 
-    def fix_permissions(self):
-        if 'root' not in self.dir_user:
-            self.run_command('chown -H -R ' + self.username + ':' +
-                             self.username + " /home/" + self.username + '/')
+    # def fix_permissions(self):
+    #     if 'root' not in self.dir_user:
+    #         self.run_command('chown -H -R ' + self.username + ':' +
+    #                          self.username + " /home/" + self.username + '/')
+
 
 if __name__ == "__main__":
-    print ("vim.py started...")
+    print("vim.py started...")
     start = timeit.default_timer()
 
     # argparser
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     vim = Vim()
-    vim.check_root()
+    # vim.check_root()
     vim.pick_user(args.user)
     vim.packages()
     vim.directories()
@@ -180,5 +180,5 @@ if __name__ == "__main__":
     vim.fix_permissions()
 
     stop = timeit.default_timer()
-    print (str(stop - start) + " seconds to complete...")
-    print ("vim.py completed...")
+    print(str(stop - start) + " seconds to complete...")
+    print("vim.py completed...")
