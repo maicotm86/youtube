@@ -156,11 +156,6 @@ class Vim(object):
                                    self.dir_user +
                                    '.vim/ftplugin/python_editing.vim')
 
-    # def fix_permissions(self):
-    #     if 'root' not in self.dir_user:
-    #         self.run_command('chown -H -R ' + self.username + ':' +
-    #                          self.username + " /home/" + self.username + '/')
-
 
 if __name__ == "__main__":
     print("vim.py started...")
@@ -177,7 +172,6 @@ if __name__ == "__main__":
     vim.packages()
     vim.directories()
     vim.config()
-    vim.fix_permissions()
 
     stop = timeit.default_timer()
     print(str(stop - start) + " seconds to complete...")
